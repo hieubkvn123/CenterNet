@@ -1,14 +1,12 @@
-import sys
-CENTERNET_PATH = 'src/lib/'
-sys.path.insert(0, CENTERNET_PATH)
+import cv2
+from gluoncv import model_zoo, data, utils
+from matplotlib.pyplot as plt
 
-from detectors.detector_factory import detector_factory
-from opts import opts
+net = model_zoo.get_model('center_net_resnet101_v1b_dcnv2_coco', pretrained=True)
 
-MODEL_PATH = './models/ctdet_coco_hg.pth'
-TASK = 'ctdet' # or 'multi_pose' for human pose estimation
-opt = opts().init('{} --load_model {}'.format(TASK, MODEL_PATH).split(' '))
-detector = detector_factory[opt.task](opt)
+img = cv2.imread('test.jpg')
+x, img = data.transforms.presets.center_net.load_test(img, short=512)
 
-img = '/home/hieu/Pictures/traffic/1.jpg' 
-ret = detector.run(img)['results']
+class_IDS, scores, bounding_boxes = net(x)
+ax = utils.viz.plot_bbox(img, bounding_boxes[0], scores[0], classIDS[0], class_names=net.classes)
+plt.show()
